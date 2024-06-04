@@ -1,4 +1,4 @@
-PGraphics texture_generation(int base, int base_color, int shape, int texture_width, int texture_height) {
+PGraphics texture_generation(int base, int base_color, int shape, int shape_size, int texture_width, int texture_height) {
   PImage background;
   PGraphics new_texture;
 
@@ -83,7 +83,7 @@ PGraphics texture_generation(int base, int base_color, int shape, int texture_wi
   } else if (base == 4) {
     for (int x = 0; x < background.width; x++) {
       for (int y = 0; y < background.height; y++) {
-        
+
         //Color pixels
         if (base_color == 1) {
           background.pixels[x+y*background.width] = color(int(random(255)), 0, 0);
@@ -126,18 +126,41 @@ PGraphics texture_generation(int base, int base_color, int shape, int texture_wi
     new_texture.fill(fill_color);
     new_texture.stroke(fill_color);
 
+    //Size
+    float random_raio = random(5,20);
+    float random_rect = random(5,20);
+    float random_triangle = random(-20,20);
+    float random_line = random(-60,60);
+
+    if (shape_size == 1) {
+      random_raio = random(5,20);
+      random_rect = random(5,20);
+      random_triangle = random(-20,20);
+      random_line = random(-60,60);
+    } else if (shape_size == 2) {
+       random_raio = random(20,35);
+      random_rect = random(20,35);
+      random_triangle = random(-40,40);
+      random_line = random(-100,100);
+    } else if (shape_size == 3) {
+       random_raio = random(35,50);
+      random_rect = random(35,50);
+      random_triangle = random(-60,60);
+      random_line = random(-140,140);
+    }
+
     if (shape == 1) {
-      new_texture.ellipse(random(texture_width), random(texture_height), random(5, 20), random(5, 20));
+      new_texture.ellipse(random(texture_width), random(texture_height), random_raio, random_raio);
     } else if (shape == 2) {
-      new_texture.rect(random(texture_width), random(texture_height), random(5, 20), random(5, 20));
+      new_texture.rect(random(texture_width), random(texture_height), random_rect,  random_rect);
     } else if (shape == 3) {
       float inicial_x = random(texture_width), inicial_y = random(texture_height);
-      new_texture.triangle(inicial_x, inicial_y, inicial_x+random(-20, 20), inicial_y+random(-20, 20), inicial_x+random(-20, 20), inicial_y+random(-20, 20));
+      new_texture.triangle(inicial_x, inicial_y, inicial_x+random_triangle, inicial_y+random_triangle, inicial_x+random_triangle, inicial_y+random(-20, 20));
     } else if (shape == 4) {
       float inicial_x = random(texture_width), inicial_y = random(texture_height);
 
       new_texture.strokeWeight(2);
-      new_texture.line(inicial_x, inicial_y, inicial_x+random(-60, 60), inicial_y+random(-60, 60));
+      new_texture.line(inicial_x, inicial_y, inicial_x+random_line, inicial_y+random_line);
     }
   }
 
