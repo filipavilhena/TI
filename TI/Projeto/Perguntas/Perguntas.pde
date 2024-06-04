@@ -31,6 +31,11 @@ Capture cam;
 PImage src, result, bg;
 OpenCV opencv;
 ArrayList<Contour> contours;
+boolean polygonApproximation = true;
+boolean mask = false;
+
+JSONArray contoursJSON;
+JSONArray points;
 void setup() {
 
   size(900, 900);
@@ -67,68 +72,26 @@ void setup() {
 }
 
 void draw() {
+  
+  println(qID);
 
   if (qID != 5) {
     background(0);
   }
   textSize(40);
 
-  if (cam.available() == true && qID == 5) {
+  if (cam.available() == true && (qID == 5 || qID == 6)) {
     cam.read();
 
     src = cam.copy();
 
-    opencv.loadImage(src);
-    if (step < 1) {
-      //opencv.gray();
-    } else if (step < 2) {
-      opencv.blur(5);
-    } else if (step < 3) {
-      opencv.blur(5);
-      opencv.diff(bg);
-    } else if (step < 4) {
-      opencv.blur(5);
-      opencv.diff(bg);
-      opencv.threshold(100);
-    } else if (step < 5) {
-      opencv.blur(5);
-      opencv.diff(bg);
-      opencv.contrast(3);
-      opencv.threshold(100);
-      opencv.findCannyEdges(0, 150);
-    } else if (step < 6) {
-      opencv.blur(5);
-      opencv.diff(bg);
-      opencv.contrast(3);
-      opencv.threshold(100);
-      opencv.findCannyEdges(0, 150);
-      println("found " + contours.size() + " contours");
-    }
-
-    contours = opencv.findContours();
-
-    result = opencv.getOutput();
-
-    image(result, 0, 0);
-
-    pushStyle();
-    for (Contour contour : contours) {
-      noFill();
-      stroke(0, 255, 0);
-      contour.draw();
-
-      stroke(255, 0, 0);
-      beginShape();
-      for (PVector point : contour.getPolygonApproximation().getPoints()) {
-        vertex(point.x, point.y);
-      }
-      endShape();
-    }
-    popStyle();
+    image(src, 0, 0);
   }
 
   displayCurrentUser();
-  showQuestions(qID);
+  if (qID < 6) {
+    showQuestions(qID);
+  }
 
   //Leitura do input
   while (myPort.available() > 0) {
@@ -149,6 +112,98 @@ void draw() {
           //Se recebeu um Save
           if (qID == 5) {
             saveBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat", answers);
+            qID++;
+          }
+          
+          if (qID == 6) {
+            background(0);
+            PImage img = cam.copy();
+            image(img, 0, 0);
+            saveFrame();
+            
+            cam.read();
+
+            src = cam.copy();
+        
+            opencv.loadImage(src);
+        
+            opencv.diff(bg);
+        
+            opencv.blur(24);
+            opencv.threshold(35);
+        
+            contours = opencv.findContours();
+        
+            result = opencv.getOutput();
+        
+            // get countours
+            println("found", contours.size(), "contours");
+        
+            //image(src, 0, 0);
+        
+            if (mask) {
+              //result.filter(INVERT);
+              // ensure that result has the same size than frame
+              result = result.get(0, 0, src.width, src.height);
+              PImage copiedFrame = src.copy();
+              copiedFrame.mask(result);
+              //image(copiedFrame, src.width, 0);
+            } else {
+              //image(result, src.width, 0);
+            }
+        
+            noFill();
+            strokeWeight(5);
+            
+            contoursJSON = new JSONArray();
+            
+            int index = 0;
+            
+            for (Contour contour : contours) {
+              
+              JSONObject cnt = new JSONObject();
+              
+              cnt.setInt("id", index);
+              
+              color c = polygonApproximation ? color(255, 0, 0) : color(0, 255, 0);
+              // draw contour
+              if (!polygonApproximation) {
+                stroke(c);
+                contour.draw();
+              } else {
+                stroke(c);
+                beginShape();
+                
+                points = new JSONArray();
+                
+                println(contour.getPolygonApproximation().getPoints());
+                
+                int pointIndex = 0;
+                
+                for (PVector point : contour.getPolygonApproximation().getPoints()) {
+                  vertex(point.x, point.y);
+                  
+                  JSONObject pnt = new JSONObject();
+                    
+                  pnt.setFloat("x", point.x);
+                  pnt.setFloat("y", point.y);
+                  
+                  points.setJSONObject(pointIndex, pnt);
+                
+                  pointIndex++;
+                }
+                
+                cnt.setJSONArray("points", points);
+                endShape(CLOSE);
+              }
+              
+              contoursJSON.setJSONObject(index, cnt);
+              
+              index++;
+            }
+            
+            saveJSONArray(contoursJSON, "data/new.json");
+            
             return;
           }
           //Temos de ter uma resposta selecionada
@@ -172,9 +227,11 @@ void draw() {
           //Regista o novo user
           writeNewUser(userIdSplit);
         }
-
-        showQuestions(qID);
-
+        
+        if(qID < 6) {
+          showQuestions(qID);
+        }
+        
         //Se um cartao diferente foi lido
         if (byte(int(userIdSplit[1])) != currentUser[0]
           || byte(int(userIdSplit[2])) != currentUser[1]
@@ -185,7 +242,10 @@ void draw() {
           if (confirmedNewUser) {
             writeNewUser(userIdSplit);
             qID = 0;
-            showQuestions(qID);
+            
+            if(qID < 6) {
+              showQuestions(qID);
+            }
 
             //Senao, pede confirmacao
           } else {
