@@ -13,8 +13,9 @@ boolean confirmedNewUser = true;
 
 byte[] answers = new byte[4];
 int selectedAnswer = 0;
+int currDistance = 0;
 
-String[] questions = {"Para começar o teste, por favor", "Pergunta 1", "Pergunta 2", "Pergunta 3", "Pergunta 4", " "};
+String[] questions = {"Para começar o teste, por favor", "Pergunta 1", "Pergunta 2", "Pergunta 3", " "};
 String[][] options = {
   {"encosta o teu cartão da UC ao leitor.",
     "Prometemos não comprar torradas",
@@ -23,7 +24,6 @@ String[][] options = {
   {"Q2 O1", "Q2 O2", "Q2 O3", "Q2 O4"},
   {"Q3 O1", "Q3 O2", "Q3 O3", "Q3 O4"},
   {"Q4 O1", "Q4 O2", "Q4 O3", "Q4 O4"},
-  {"Q5 O1", "Q5 O2", "Q5 O3", "Q5 O4"},
   {" ", "Sorria, está a ser filmado! :D", " ", " "}};
 int qID = 0;
 
@@ -75,12 +75,12 @@ void draw() {
   
   println(qID);
 
-  if (qID != 5) {
+  if (qID != 4) {
     background(0);
   }
   textSize(40);
 
-  if (cam.available() == true && (qID == 5 || qID == 6)) {
+  if (cam.available() == true && (qID == 4 || qID == 5)) {
     cam.read();
 
     src = cam.copy();
@@ -89,14 +89,22 @@ void draw() {
   }
 
   displayCurrentUser();
-  if (qID < 6) {
+  if (qID < 5) {
     showQuestions(qID);
+  } else if (qID < 6) {
+    qID = 0;
+    confirmedNewUser = true;
   }
 
   //Leitura do input
   while (myPort.available() > 0) {
     myString = myPort.readStringUntil(lf);
     if (myString != null) {
+      
+      if (myString.charAt(0) == 'D') {
+        String[] stringSplit = split(myString, ':');
+        currDistance = int(float(stringSplit[1]));
+      }
 
       //Se recebeu input de um botao
       if (myString.charAt(0) == 'B') {
@@ -110,16 +118,16 @@ void draw() {
           text(selectedAnswer, 50, 250);
         } else {
           //Se recebeu um Save
-          if (qID == 5) {
+          if (qID == 4) {
             saveBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat", answers);
             qID++;
           }
           
-          if (qID == 6) {
+          if (qID == 5) {
             background(0);
             PImage img = cam.copy();
             image(img, 0, 0);
-            saveFrame();
+            //saveFrame();
             
             cam.read();
 
@@ -202,7 +210,7 @@ void draw() {
               index++;
             }
             
-            saveJSONArray(contoursJSON, "data/new.json");
+            saveJSONArray(contoursJSON, "data/"+str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
             
             return;
           }
@@ -211,7 +219,8 @@ void draw() {
           if (selectedAnswer != 0 && qID != 0) {
             answers[qID-1] = byte(selectedAnswer);
             selectedAnswer = 0;
-
+            answers[3] = byte(currDistance);
+            
             qID++;
           }
         }
@@ -228,7 +237,7 @@ void draw() {
           writeNewUser(userIdSplit);
         }
         
-        if(qID < 6) {
+        if(qID < 5) {
           showQuestions(qID);
         }
         
@@ -243,7 +252,7 @@ void draw() {
             writeNewUser(userIdSplit);
             qID = 0;
             
-            if(qID < 6) {
+            if(qID < 5) {
               showQuestions(qID);
             }
 
