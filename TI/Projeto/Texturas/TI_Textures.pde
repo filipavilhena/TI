@@ -169,11 +169,14 @@ void getData() {
   File info = dataFile(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
   boolean exist_outline = outline.isFile();
   boolean exist_info = info.isFile();
-  
-  if(exist_outline == false || exist_info == false){
-  println("Cartão com ID inválido");
+
+  if (exist_outline == false || exist_info == false) {
+    background(0);
+    textSize(30);
+    color(255);
+    text("Faz o teste e cria a tua obra de arte!", 50, 50);
   }
-  
+
   byte [] load = loadBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
   contours = loadJSONArray(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
   //byte [] load = loadBytes("19 52 61 -67.dat");
