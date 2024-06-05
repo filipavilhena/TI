@@ -173,5 +173,5 @@ void getData() {
   base = load[0];
   base_color = load[1];
   shape = load[2];
-  //shape_size = load[3];
+  shape_size = load[3];
 }
