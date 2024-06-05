@@ -41,8 +41,8 @@ void setup() {
   //Shape
   contours = loadJSONArray("new.json");
   /*contour = contours.getJSONObject(0);
-  points = contour.getJSONArray("points");
-  point = points.getJSONObject(0);*/
+   points = contour.getJSONArray("points");
+   point = points.getJSONObject(0);*/
   //float x = point.getFloat("x");
 
   //Captures
@@ -96,8 +96,8 @@ void shape_contour() {
       x = point.getFloat("x");
       y = point.getFloat("y");
       vertex(x, y, x, y);
-      println(x);
-      println(y);
+      //println(x);
+      //println(y);
     }
 
 
@@ -165,6 +165,15 @@ void getData() {
     drawn_texture = false;
   }
 
+  File outline = dataFile(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
+  File info = dataFile(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
+  boolean exist_outline = outline.isFile();
+  boolean exist_info = info.isFile();
+  
+  if(exist_outline == false || exist_info == false){
+  println("Cartão com ID inválido");
+  }
+  
   byte [] load = loadBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
   contours = loadJSONArray(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
   //byte [] load = loadBytes("19 52 61 -67.dat");
