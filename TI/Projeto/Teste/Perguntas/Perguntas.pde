@@ -47,12 +47,12 @@ void setup() {
   // List all the available serial ports
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[2], 9600);
-  myPort.clear();
-  // Throw out the first reading, in case we started reading
-  // in the middle of a string from the sender.
-  myString = myPort.readStringUntil(lf);
-  myString = null;
+  /*myPort = new Serial(this, Serial.list()[2], 9600);
+   myPort.clear();
+   // Throw out the first reading, in case we started reading
+   // in the middle of a string from the sender.
+   myString = myPort.readStringUntil(lf);
+   myString = null;*/
 
   String[] cameras = Capture.list();
 
@@ -86,19 +86,6 @@ void draw() {
 
   if (qID != 4) {
     background(bg_img);
-
-    for (int i=0; i<4; i++) {
-      pushStyle();
-      if (i==0) {
-        fill(255, 0, 0);
-      } else if (i == 1) {
-      } else if (i == 2) {
-      } else if (i == 3) {
-      }
-
-      rect(50, ((200+50)*i), 50, 50);
-      popStyle();
-    }
   }
 
   textSize(40);
@@ -307,6 +294,21 @@ void showQuestions(int qID) {
     }
     //Desenha a opcao
     text(options[qID][i], width/2, 350 + (50*(i+1)));
+
+    pushStyle();
+    if (i==0) {
+      fill(175, 116, 116);
+    } else if (i == 1) {
+      fill(134, 162, 121);
+    } else if (i == 2) {
+      fill(137, 172, 180);
+    } else if (i == 3) {
+      fill(194, 165, 105);
+    }
+
+    rectMode(CENTER);
+    rect(width/2, width/2, 350 + (50*(i+1)), 200, 100);
+    popStyle();
   }
   popStyle();
 }
