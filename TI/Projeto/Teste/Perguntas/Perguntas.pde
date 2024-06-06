@@ -15,15 +15,18 @@ byte[] answers = new byte[4];
 int selectedAnswer = 0;
 int currDistance = 0;
 
-String[] questions = {"Para começar o teste, por favor", "Pergunta 1", "Pergunta 2", "Pergunta 3", " "};
+String[] questions = {"Para começar o teste, por favor", 
+                      "O que farias se a vida te desse limões?", 
+                      "Pergunta 2", 
+                      "Qual destas comidas inclui\nmais *spyware* do governo?", " "};
 String[][] options = {
   {"encosta o teu cartão da UC ao leitor.",
     "Prometemos não comprar torradas",
     "com a tua conta dos SASUC.",
   "Talvez. :)"},
-  {"Q2 O1", "Q2 O2", "Q2 O3", "Q2 O4"},
+  {"Limonada (cringe)", "Nada, sou alérgico", "I DON'T WANT YOUR DAMN LEMONS!", "Limonada (não cringe)"},
   {"Q3 O1", "Q3 O2", "Q3 O3", "Q3 O4"},
-  {"Q4 O1", "Q4 O2", "Q4 O3", "Q4 O4"},
+  {"Bolachas Maria", "Sandes Mista", "Pizza", "Esparguete"},
   {" ", "Sorria, está a ser filmado! :D", " ", " "}};
 int qID = 0;
 
@@ -37,8 +40,13 @@ boolean mask = false;
 JSONArray contoursJSON;
 JSONArray points;
 
+int blurValue;
+int thresholdValue;
+
 //UI
 PImage bg_img;
+
+PFont font;
 
 void setup() {
 
@@ -47,12 +55,12 @@ void setup() {
   // List all the available serial ports
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  /*myPort = new Serial(this, Serial.list()[2], 9600);
+  myPort = new Serial(this, Serial.list()[0], 9600);
    myPort.clear();
    // Throw out the first reading, in case we started reading
    // in the middle of a string from the sender.
    myString = myPort.readStringUntil(lf);
-   myString = null;*/
+   myString = null;
 
   String[] cameras = Capture.list();
 
@@ -64,7 +72,7 @@ void setup() {
     printArray(cameras);
 
     //if it fails replace cameras[0] per "pipeline:autovideosrc"
-    cam = new Capture(this, 1280, 720, cameras[2], 30);
+    cam = new Capture(this, 1280, 720, cameras[0], 30);
     cam.start();
 
     opencv = new OpenCV(this, cam);
@@ -78,6 +86,10 @@ void setup() {
   background(bg_img);
   smooth(8);
   fill(0);
+  
+  textSize(30);
+  
+  font = createFont("font.ttf", 80);
 }
 
 void draw() {
@@ -96,6 +108,25 @@ void draw() {
     src = cam.copy();
 
     image(src, 0, 0);
+    
+    src = cam.copy();
+
+            opencv.loadImage(src);
+
+            opencv.diff(bg);
+
+            blurValue = 24;
+            thresholdValue = 35;
+            
+            opencv.blur(blurValue);
+            opencv.threshold(thresholdValue);
+
+            contours = opencv.findContours();
+
+            result = opencv.getOutput();
+            
+            
+    image(result, 0, 0);
   }
 
   displayCurrentUser();
@@ -147,12 +178,17 @@ void draw() {
 
             opencv.diff(bg);
 
-            opencv.blur(24);
-            opencv.threshold(35);
+            blurValue = 24;
+            thresholdValue = 35;
+            
+            opencv.blur(blurValue);
+            opencv.threshold(thresholdValue);
 
             contours = opencv.findContours();
 
             result = opencv.getOutput();
+            
+            image(result, 0, 0);
 
             // get countours
             println("found", contours.size(), "contours");
@@ -280,22 +316,27 @@ void showQuestions(int qID) {
 
   pushStyle();
 
+  float randX = random(-0.5, 0.5);
+  float randY = random(-0.5, 0.5);
+  float randSize = random(0, 0.5);
+  
   //Desenha a pergunta
   textAlign(CENTER, CENTER);
-  text(questions[qID], width/2, 350);
+  textFont(font);
+  textSize(28+randSize);
+  if (qID == 0) {
+    text(questions[qID], width/2+randX, 350+randY);
+  } else {
+    text(questions[qID], width/2+randX, 300+randY);
+  }
 
   //Para todas as opcoes de resposta
   for (int i = 0; i < 4; i++) {
     //Se nao for o texto introdutorio
-    if (qID != 0) {
-      //Se for a opcao selecionada, muda o aspeto
-      if (i+1 == selectedAnswer) fill(255, 0, 0);
-      else fill(0);
-    }
-    //Desenha a opcao
-    text(options[qID][i], width/2, 350 + (50*(i+1)));
-
+    
     pushStyle();
+    strokeWeight(2);
+    
     if (i==0) {
       fill(175, 116, 116);
     } else if (i == 1) {
@@ -307,8 +348,31 @@ void showQuestions(int qID) {
     }
 
     rectMode(CENTER);
-    rect(width/2, width/2, 350 + (50*(i+1)), 200, 100);
+    if (qID != 0 && qID != 4 && qID != 5) {
+      rect(width/2+randX, 350 + (70*(i+1))+randY, 500, 50);
+    }
     popStyle();
+    
+    if (qID != 0) {
+      //Se for a opcao selecionada, muda o aspeto
+      if (i+1 == selectedAnswer) {
+        float randAberr = random(1, 2);
+        fill(255, 100, 100);
+        text(options[qID][i], width/2+randAberr, 350 + (70*(i+1))+randY);
+        fill(100, 100, 255);
+        text(options[qID][i], width/2-randAberr, 350 + (70*(i+1))+randY);
+        
+        fill(255, 255, 180); 
+
+      } else {
+        fill(0);
+      }
+    }
+    //Desenha a opcao
+    textSize(28+randSize);
+    text(options[qID][i], width/2+randX, 350 + (70*(i+1))+randY);
+
+    
   }
   popStyle();
 }
@@ -361,7 +425,7 @@ void keyReleased() {
   if (key == 'v') {
     byte[] load = loadBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
     for (int i = 0; i < 4; i++) {
-      println("Gay: "+load[i]);
+      println(load[i]);
     }
   }
   if (key == 'p') {

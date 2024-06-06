@@ -39,7 +39,7 @@ void setup() {
   texture_height = 800;
 
   //Shape
-  contours = loadJSONArray("../data/96 -15 -13 18.json");
+  contours = loadJSONArray("../data/0 0 0 0.json");
   /*contour = contours.getJSONObject(0);
    points = contour.getJSONArray("points");
    point = points.getJSONObject(0);*/
@@ -47,6 +47,8 @@ void setup() {
 
   //Captures
   n = 1;
+  
+  smooth(8);
 }
 
 void draw() {
@@ -57,7 +59,7 @@ void draw() {
    println("pu" + previousUser);*/
   //println(myPort.available()>0);
 
-  if (myPort.available() > 0) {
+  while (myPort.available() > 0) {
     getData();
     new_texture = texture_generation(base, base_color, shape, shape_size, texture_width, texture_height);
   }
