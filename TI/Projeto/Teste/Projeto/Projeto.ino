@@ -213,6 +213,13 @@ void loop() {
 
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
   if (mfrc522.PICC_IsNewCardPresent()) {
+    //Serial.println("NewCard");
+    Serial.print("U: ");
+    for (int i = 0; i < 4; i++) {
+      Serial.print(mfrc522.uid.uidByte[i]);
+      Serial.print(" ");
+    }
+    //Serial.println("");
     digitalWrite(ledPin, HIGH);
   } else {
     digitalWrite(ledPin, LOW);
@@ -225,11 +232,6 @@ void loop() {
     return;
   }
 
-  Serial.print("U: ");
-  for (int i = 0; i < 4; i++) {
-    Serial.print(mfrc522.uid.uidByte[i]);
-    Serial.print(" ");
-  }
 
 
   if (mfrc522.uid.uidByte[0] == accessUID[0] && mfrc522.uid.uidByte[1] == accessUID[1] && mfrc522.uid.uidByte[2] == accessUID[2] && mfrc522.uid.uidByte[3] == accessUID[3]) {

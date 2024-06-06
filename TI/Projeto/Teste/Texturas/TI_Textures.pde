@@ -20,8 +20,8 @@ void setup() {
   //Configurar e Limpar a Serial Port
   printArray(Serial.list());
   String portName = Serial.list()[0];
-   myPort = new Serial(this, portName, 9600);
-   myPort.clear();
+  myPort = new Serial(this, portName, 9600);
+  myPort.clear();
 
   //Janela
   size(800, 800, P3D);
@@ -39,7 +39,7 @@ void setup() {
   texture_height = 800;
 
   //Shape
-  contours = loadJSONArray("0 0 0 0.json");
+  contours = loadJSONArray("../data/0 0 0 0.json");
   /*contour = contours.getJSONObject(0);
    points = contour.getJSONArray("points");
    point = points.getJSONObject(0);*/
@@ -53,20 +53,27 @@ void draw() {
   //background(0);
 
   //Read Data
-  while (myPort.available() > 0) {
-   getData();
-   }
+  /*previousUser = currentUser;
+   println("pu" + previousUser);*/
+  //println(myPort.available()>0);
 
-  //Textura
-  if (drawn_texture == false) {
+  if (myPort.available() > 0) {
+    getData();
     new_texture = texture_generation(base, base_color, shape, shape_size, texture_width, texture_height);
-    //drawn_texture = true;
-    //image(new_texture, 0, 0);
-    //shape();
-    shape_contour();
   }
-  
-  println(currentUser);
+
+
+  //println(drawn_texture);
+  //Textura
+  /*if (drawn_texture == false) {*/
+
+  //drawn_texture = true;
+  //image(new_texture, 0, 0);
+  //shape();
+  shape_contour();
+  /*}*/
+
+  //println(currentUser);
 }
 
 //Create Shape and Fill with Texture
@@ -142,12 +149,11 @@ void keyPressed() {
 }
 
 void getData() {
-
-  previousUser = currentUser; //VER CÓDIGO
+  //println(currentUser);
 
   //Ler a informação da serial port
   myString = myPort.readStringUntil(lf);
-  println(myString);
+  //println(myString);
 
   if (myString != null) {
 
@@ -163,26 +169,15 @@ void getData() {
   }
 
   //VER CÓDIGO
-  if (previousUser != currentUser) {
-    drawn_texture = false;
-  }
+  /* if (previousUser != currentUser) {
+   drawn_texture = false;
+   }*/
 
-  File outline = dataFile(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
-  File info = dataFile(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
-  boolean exist_outline = outline.isFile();
-  boolean exist_info = info.isFile();
 
-  if (exist_outline == false || exist_info == false) {
-    background(0);
-    textSize(30);
-    color(255);
-    text("Faz o teste e cria a tua obra de arte!", 50, 50);
-  }
-
-  byte [] load = loadBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
+  byte [] load = loadBytes("../data/" + str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
   //byte [] load = loadBytes("19 52 61 -67.dat");
   //byte [] load = loadBytes("-96 72 -101 83.dat");
-  contours = loadJSONArray(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
+  contours = loadJSONArray("../data/" + str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
 
   base = load[0];
   base_color = load[1];
