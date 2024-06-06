@@ -19,9 +19,9 @@ int lf = 10;
 void setup() {
   //Configurar e Limpar a Serial Port
   printArray(Serial.list());
-  /*String portName = Serial.list()[2];
+  String portName = Serial.list()[0];
    myPort = new Serial(this, portName, 9600);
-   myPort.clear();*/
+   myPort.clear();
 
   //Janela
   size(800, 800, P3D);
@@ -33,13 +33,13 @@ void setup() {
   shape = 1;
   shape_size = 1;
 
-  drawn_texture = false;
+  drawn_texture = true;
 
   texture_width = 800;
   texture_height = 800;
 
   //Shape
-  contours = loadJSONArray("new.json");
+  contours = loadJSONArray("0 0 0 0.json");
   /*contour = contours.getJSONObject(0);
    points = contour.getJSONArray("points");
    point = points.getJSONObject(0);*/
@@ -53,18 +53,20 @@ void draw() {
   //background(0);
 
   //Read Data
-  /*while (myPort.available() > 0) {
+  while (myPort.available() > 0) {
    getData();
-   }*/
+   }
 
   //Textura
   if (drawn_texture == false) {
     new_texture = texture_generation(base, base_color, shape, shape_size, texture_width, texture_height);
-    drawn_texture = true;
+    //drawn_texture = true;
     //image(new_texture, 0, 0);
     //shape();
     shape_contour();
   }
+  
+  println(currentUser);
 }
 
 //Create Shape and Fill with Texture
@@ -101,7 +103,7 @@ void shape_contour() {
     }
 
 
-    endShape();
+    endShape(CLOSE);
   }
 }
 
@@ -178,9 +180,9 @@ void getData() {
   }
 
   byte [] load = loadBytes(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
-  contours = loadJSONArray(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
   //byte [] load = loadBytes("19 52 61 -67.dat");
   //byte [] load = loadBytes("-96 72 -101 83.dat");
+  contours = loadJSONArray(str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
 
   base = load[0];
   base_color = load[1];

@@ -250,7 +250,7 @@ void draw() {
           //Se ja foi confirmado que se quer mudar de user, escreve este user
           if (confirmedNewUser) {
             writeNewUser(userIdSplit);
-            qID = 0;
+            qID = 1;
             
             if(qID < 5) {
               showQuestions(qID);
