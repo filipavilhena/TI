@@ -36,15 +36,18 @@ boolean mask = false;
 
 JSONArray contoursJSON;
 JSONArray points;
+
+//UI
+PImage bg_img;
+
 void setup() {
 
   size(900, 900);
-  background(0);
 
   // List all the available serial ports
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[0], 9600);
+  myPort = new Serial(this, Serial.list()[2], 9600);
   myPort.clear();
   // Throw out the first reading, in case we started reading
   // in the middle of a string from the sender.
@@ -61,7 +64,7 @@ void setup() {
     printArray(cameras);
 
     //if it fails replace cameras[0] per "pipeline:autovideosrc"
-    cam = new Capture(this, 1280, 720, cameras[0], 30);
+    cam = new Capture(this, 1280, 720, cameras[2], 30);
     cam.start();
 
     opencv = new OpenCV(this, cam);
@@ -69,15 +72,35 @@ void setup() {
     bg = cam.copy();
   }
   frameRate(30);
+
+  bg_img = loadImage("bg.jpg");
+  bg_img.resize(900, 900);
+  background(bg_img);
+  smooth(8);
+  fill(0);
 }
 
 void draw() {
-  
+
   println(qID);
 
   if (qID != 4) {
-    background(0);
+    background(bg_img);
+
+    for (int i=0; i<4; i++) {
+      pushStyle();
+      if (i==0) {
+        fill(255, 0, 0);
+      } else if (i == 1) {
+      } else if (i == 2) {
+      } else if (i == 3) {
+      }
+
+      rect(50, ((200+50)*i), 50, 50);
+      popStyle();
+    }
   }
+
   textSize(40);
 
   if (cam.available() == true && (qID == 4 || qID == 5)) {
@@ -100,7 +123,7 @@ void draw() {
   while (myPort.available() > 0) {
     myString = myPort.readStringUntil(lf);
     if (myString != null) {
-      
+
       if (myString.charAt(0) == 'D') {
         String[] stringSplit = split(myString, ':');
         currDistance = int(float(stringSplit[1]));
@@ -109,46 +132,46 @@ void draw() {
       //Se recebeu input de um botao
       if (myString.charAt(0) == 'B') {
         String[] stringSplit = split(myString, ':');
-        text(stringSplit[1], 50, 200);
+        //text(stringSplit[1], 50, 200);
 
         //Se recebeu uma botao numerico
         if (stringSplit[1].charAt(0) != 'S') {
           //Por alguma razao aqui temos de converter para float primeiro e depois int, senao da 0. Fixe!
           selectedAnswer = int(float(stringSplit[1]));
-          text(selectedAnswer, 50, 250);
+          //text(selectedAnswer, 50, 250);
         } else {
           //Se recebeu um Save
           if (qID == 4) {
             saveBytes("../data/"+str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat", answers);
             qID++;
           }
-          
+
           if (qID == 5) {
             background(0);
             PImage img = cam.copy();
             image(img, 0, 0);
             //saveFrame();
-            
+
             cam.read();
 
             src = cam.copy();
-        
+
             opencv.loadImage(src);
-        
+
             opencv.diff(bg);
-        
+
             opencv.blur(24);
             opencv.threshold(35);
-        
+
             contours = opencv.findContours();
-        
+
             result = opencv.getOutput();
-        
+
             // get countours
             println("found", contours.size(), "contours");
-        
+
             //image(src, 0, 0);
-        
+
             if (mask) {
               //result.filter(INVERT);
               // ensure that result has the same size than frame
@@ -159,20 +182,20 @@ void draw() {
             } else {
               //image(result, src.width, 0);
             }
-        
+
             noFill();
             strokeWeight(5);
-            
+
             contoursJSON = new JSONArray();
-            
+
             int index = 0;
-            
+
             for (Contour contour : contours) {
-              
+
               JSONObject cnt = new JSONObject();
-              
+
               cnt.setInt("id", index);
-              
+
               color c = polygonApproximation ? color(255, 0, 0) : color(0, 255, 0);
               // draw contour
               if (!polygonApproximation) {
@@ -181,37 +204,37 @@ void draw() {
               } else {
                 stroke(c);
                 beginShape();
-                
+
                 points = new JSONArray();
-                
+
                 println(contour.getPolygonApproximation().getPoints());
-                
+
                 int pointIndex = 0;
-                
+
                 for (PVector point : contour.getPolygonApproximation().getPoints()) {
                   vertex(point.x, point.y);
-                  
+
                   JSONObject pnt = new JSONObject();
-                    
+
                   pnt.setFloat("x", point.x);
                   pnt.setFloat("y", point.y);
-                  
+
                   points.setJSONObject(pointIndex, pnt);
-                
+
                   pointIndex++;
                 }
-                
+
                 cnt.setJSONArray("points", points);
                 endShape(CLOSE);
               }
-              
+
               contoursJSON.setJSONObject(index, cnt);
-              
+
               index++;
             }
-            
+
             saveJSONArray(contoursJSON, "../data/"+str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
-            
+
             return;
           }
           //Temos de ter uma resposta selecionada
@@ -220,7 +243,7 @@ void draw() {
             answers[qID-1] = byte(selectedAnswer);
             selectedAnswer = 0;
             answers[3] = byte(currDistance);
-            
+
             qID++;
           }
         }
@@ -236,11 +259,11 @@ void draw() {
           //Regista o novo user
           writeNewUser(userIdSplit);
         }
-        
-        if(qID < 5) {
+
+        if (qID < 5) {
           showQuestions(qID);
         }
-        
+
         //Se um cartao diferente foi lido
         if (byte(int(userIdSplit[1])) != currentUser[0]
           || byte(int(userIdSplit[2])) != currentUser[1]
@@ -251,8 +274,8 @@ void draw() {
           if (confirmedNewUser) {
             writeNewUser(userIdSplit);
             qID = 1;
-            
-            if(qID < 5) {
+
+            if (qID < 5) {
               showQuestions(qID);
             }
 
@@ -280,7 +303,7 @@ void showQuestions(int qID) {
     if (qID != 0) {
       //Se for a opcao selecionada, muda o aspeto
       if (i+1 == selectedAnswer) fill(255, 0, 0);
-      else fill(255);
+      else fill(0);
     }
     //Desenha a opcao
     text(options[qID][i], width/2, 350 + (50*(i+1)));
@@ -309,10 +332,10 @@ void confirmNewUser() {
 }
 
 void displayCurrentUser() {
-  text(currentUser[0], 50, 50);
-  text(currentUser[1], 150, 50);
-  text(currentUser[2], 250, 50);
-  text(currentUser[3], 350, 50);
+  /*text(currentUser[0], 50, 50);
+   text(currentUser[1], 150, 50);
+   text(currentUser[2], 250, 50);
+   text(currentUser[3], 350, 50);*/
 }
 
 boolean checkUserEmpty() {

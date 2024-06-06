@@ -127,32 +127,37 @@ PGraphics texture_generation(int base, int base_color, int shape, int shape_size
     new_texture.stroke(fill_color);
 
     //Size
-    float random_raio = random(5,20);
-    float random_rect = random(5,20);
-    float random_triangle = random(-20,20);
-    float random_line = random(-60,60);
+    float random_raio = random(5, 20);
+    float random_rect = random(5, 20);
+    float random_triangle = random(-20, 20);
+    float random_line = random(-60, 60);
 
     if (shape_size == 1) {
-      random_raio = random(5,20);
-      random_rect = random(5,20);
-      random_triangle = random(-20,20);
-      random_line = random(-60,60);
+      random_raio = random(5, 20);
+      random_rect = random(5, 20);
+      random_triangle = random(-20, 20);
+      random_line = random(-60, 60);
     } else if (shape_size == 2) {
-       random_raio = random(20,35);
-      random_rect = random(20,35);
-      random_triangle = random(-40,40);
-      random_line = random(-100,100);
+      random_raio = random(20, 35);
+      random_rect = random(20, 35);
+      random_triangle = random(-40, 40);
+      random_line = random(-100, 100);
     } else if (shape_size == 3) {
-       random_raio = random(35,50);
-      random_rect = random(35,50);
-      random_triangle = random(-60,60);
-      random_line = random(-140,140);
+      random_raio = random(35, 50);
+      random_rect = random(35, 50);
+      random_triangle = random(-60, 60);
+      random_line = random(-140, 140);
+    } else if (shape_size == 4) {
+      random_raio = random(50, 70);
+      random_rect = random(50, 70);
+      random_triangle = random(-80, 80);
+      random_line = random(-160, 160);
     }
 
     if (shape == 1) {
       new_texture.ellipse(random(texture_width), random(texture_height), random_raio, random_raio);
     } else if (shape == 2) {
-      new_texture.rect(random(texture_width), random(texture_height), random_rect,  random_rect);
+      new_texture.rect(random(texture_width), random(texture_height), random_rect, random_rect);
     } else if (shape == 3) {
       float inicial_x = random(texture_width), inicial_y = random(texture_height);
       new_texture.triangle(inicial_x, inicial_y, inicial_x+random_triangle, inicial_y+random_triangle, inicial_x+random_triangle, inicial_y+random(-20, 20));

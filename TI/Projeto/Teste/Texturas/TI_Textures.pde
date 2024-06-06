@@ -39,7 +39,7 @@ void setup() {
   texture_height = 800;
 
   //Shape
-  contours = loadJSONArray("../data/0 0 0 0.json");
+  contours = loadJSONArray("../data/96 -15 -13 18.json");
   /*contour = contours.getJSONObject(0);
    points = contour.getJSONArray("points");
    point = points.getJSONObject(0);*/
@@ -175,8 +175,6 @@ void getData() {
 
 
   byte [] load = loadBytes("../data/" + str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".dat");
-  //byte [] load = loadBytes("19 52 61 -67.dat");
-  //byte [] load = loadBytes("-96 72 -101 83.dat");
   contours = loadJSONArray("../data/" + str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
 
   base = load[0];
