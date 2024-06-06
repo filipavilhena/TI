@@ -15,17 +15,17 @@ byte[] answers = new byte[4];
 int selectedAnswer = 0;
 int currDistance = 0;
 
-String[] questions = {"Para começar o teste, por favor", 
-                      "O que farias se a vida te desse limões?", 
-                      "Pergunta 2", 
-                      "Qual destas comidas inclui\nmais *spyware* do governo?", " "};
+String[] questions = {"Para começar o teste, por favor",
+  "O que farias se a vida te desse limões?",
+  "Qual é a Cor do teu lobo frontal?",
+  "Qual destas comidas inclui\nmais *spyware* do governo?", " "};
 String[][] options = {
   {"encosta o teu cartão da UC ao leitor.",
     "Prometemos não comprar torradas",
     "com a tua conta dos SASUC.",
   "Talvez. :)"},
   {"Limonada (cringe)", "Nada, sou alérgico", "I DON'T WANT YOUR DAMN LEMONS!", "Limonada (não cringe)"},
-  {"Q3 O1", "Q3 O2", "Q3 O3", "Q3 O4"},
+  {"Vermelho", "Verde", "Azul", "Amarelo"},
   {"Bolachas Maria", "Sandes Mista", "Pizza", "Esparguete"},
   {" ", "Sorria, está a ser filmado! :D", " ", " "}};
 int qID = 0;
@@ -45,8 +45,12 @@ int thresholdValue;
 
 //UI
 PImage bg_img;
-
 PFont font;
+
+float randX = random(-0.5, 0.5);
+float randY = random(-0.5, 0.5);
+float randSize = random(0, 0.5);
+
 
 void setup() {
 
@@ -56,11 +60,11 @@ void setup() {
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
   myPort = new Serial(this, Serial.list()[0], 9600);
-   myPort.clear();
-   // Throw out the first reading, in case we started reading
-   // in the middle of a string from the sender.
-   myString = myPort.readStringUntil(lf);
-   myString = null;
+  myPort.clear();
+  // Throw out the first reading, in case we started reading
+  // in the middle of a string from the sender.
+  myString = myPort.readStringUntil(lf);
+  myString = null;
 
   String[] cameras = Capture.list();
 
@@ -85,19 +89,27 @@ void setup() {
   bg_img.resize(900, 900);
   background(bg_img);
   smooth(8);
-  fill(0);
-  
+  //fill();
+
   textSize(30);
-  
+
   font = createFont("font.ttf", 80);
 }
 
 void draw() {
 
+  randX = random(-0.5, 0.5);
+  randY = random(-0.5, 0.5);
+  randSize = random(0, 0.5);
+
+
   println(qID);
 
   if (qID != 4) {
     background(bg_img);
+    rectMode(CENTER);
+    fill(0);
+    rect(width/2-randX, height/2-randY, 850, 850);
   }
 
   textSize(40);
@@ -108,24 +120,24 @@ void draw() {
     src = cam.copy();
 
     image(src, 0, 0);
-    
+
     src = cam.copy();
 
-            opencv.loadImage(src);
+    opencv.loadImage(src);
 
-            opencv.diff(bg);
+    opencv.diff(bg);
 
-            blurValue = 24;
-            thresholdValue = 35;
-            
-            opencv.blur(blurValue);
-            opencv.threshold(thresholdValue);
+    blurValue = 24;
+    thresholdValue = 35;
 
-            contours = opencv.findContours();
+    opencv.blur(blurValue);
+    opencv.threshold(thresholdValue);
 
-            result = opencv.getOutput();
-            
-            
+    contours = opencv.findContours();
+
+    result = opencv.getOutput();
+
+
     image(result, 0, 0);
   }
 
@@ -180,14 +192,14 @@ void draw() {
 
             blurValue = 24;
             thresholdValue = 35;
-            
+
             opencv.blur(blurValue);
             opencv.threshold(thresholdValue);
 
             contours = opencv.findContours();
 
             result = opencv.getOutput();
-            
+
             image(result, 0, 0);
 
             // get countours
@@ -316,63 +328,65 @@ void showQuestions(int qID) {
 
   pushStyle();
 
-  float randX = random(-0.5, 0.5);
-  float randY = random(-0.5, 0.5);
-  float randSize = random(0, 0.5);
-  
   //Desenha a pergunta
   textAlign(CENTER, CENTER);
   textFont(font);
-  textSize(28+randSize);
+  textSize(28);
   if (qID == 0) {
-    text(questions[qID], width/2+randX, 350+randY);
+    fill(255, 255, 180);
+    text(questions[qID], width/2+randX, 200+randY);
+    text("Clica no botão 'LOCK' para progredir no teste.", width/2+randX, 820+randY);
   } else {
-    text(questions[qID], width/2+randX, 300+randY);
+    fill(255, 255, 180);
+    text(questions[qID], width/2+randX, 250+randY);
   }
 
   //Para todas as opcoes de resposta
   for (int i = 0; i < 4; i++) {
     //Se nao for o texto introdutorio
-    
+
     pushStyle();
-    strokeWeight(2);
-    
+    strokeWeight(3);
+    fill(10);
+
     if (i==0) {
-      fill(175, 116, 116);
+      stroke(175, 116, 116);
     } else if (i == 1) {
-      fill(134, 162, 121);
+      stroke(134, 162, 121);
     } else if (i == 2) {
-      fill(137, 172, 180);
+      stroke(137, 172, 180);
     } else if (i == 3) {
-      fill(194, 165, 105);
+      stroke(194, 165, 105);
     }
 
     rectMode(CENTER);
     if (qID != 0 && qID != 4 && qID != 5) {
-      rect(width/2+randX, 350 + (70*(i+1))+randY, 500, 50);
+      rect(width/2+randX, 300 + (95*(i+1))+randY, 510, 80);
     }
     popStyle();
-    
+
     if (qID != 0) {
       //Se for a opcao selecionada, muda o aspeto
       if (i+1 == selectedAnswer) {
         float randAberr = random(1, 2);
         fill(255, 100, 100);
-        text(options[qID][i], width/2+randAberr, 350 + (70*(i+1))+randY);
+        text(options[qID][i], width/2+randAberr, 300 + (95*(i+1))+randY);
         fill(100, 100, 255);
-        text(options[qID][i], width/2-randAberr, 350 + (70*(i+1))+randY);
-        
-        fill(255, 255, 180); 
+        text(options[qID][i], width/2-randAberr, 300 + (95*(i+1))+randY);
 
+        fill(255, 255, 180);
       } else {
-        fill(0);
+        fill(175);
       }
     }
     //Desenha a opcao
-    textSize(28+randSize);
-    text(options[qID][i], width/2+randX, 350 + (70*(i+1))+randY);
+    textSize(28);
 
-    
+    if (qID == 0) {
+      text(options[qID][i], width/2+randX, 200 + (95*(i+1))+randY);
+    } else {
+      text(options[qID][i], width/2+randX, 300 + (95*(i+1))+randY);
+    }
   }
   popStyle();
 }
