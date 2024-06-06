@@ -2,23 +2,22 @@ import gab.opencv.*;
 import processing.serial.*;
 import processing.video.*;
 
-int step = 0;
+int step, lf;    // Linefeed in ASCII
 
-int lf = 10;    // Linefeed in ASCII
-String myString = null;
+String myString;
 Serial myPort;  // The serial port
 
-byte[] currentUser = new byte[4];
-boolean confirmedNewUser = true;
+byte[] currentUser;
+boolean confirmedNewUser;
 
-byte[] answers = new byte[4];
-int selectedAnswer = 0;
-int currDistance = 0;
+byte[] answers;
+int selectedAnswer;
+int currDistance;
 
 String[] questions = {"Para começar o teste, por favor",
   "O que farias se a vida te desse limões?",
-  "Qual é a Cor do teu lobo frontal?",
-  "Qual destas comidas inclui\nmais *spyware* do governo?", " "};
+  "Qual é a cor do teu lobo frontal?",
+  "Qual destas comidas inclui\nmais spyware do governo?", " "};
 String[][] options = {
   {"encosta o teu cartão da UC ao leitor.",
     "Prometemos não comprar torradas",
@@ -28,14 +27,14 @@ String[][] options = {
   {"Vermelho", "Verde", "Azul", "Amarelo"},
   {"Bolachas Maria", "Sandes Mista", "Pizza", "Esparguete"},
   {" ", "Sorria, está a ser filmado! :D", " ", " "}};
-int qID = 0;
+int qID;
 
 Capture cam;
 PImage src, result, bg;
 OpenCV opencv;
 ArrayList<Contour> contours;
-boolean polygonApproximation = true;
-boolean mask = false;
+boolean polygonApproximation;
+boolean mask;
 
 JSONArray contoursJSON;
 JSONArray points;
@@ -47,24 +46,20 @@ int thresholdValue;
 PImage bg_img;
 PFont font;
 
-float randX = random(-0.5, 0.5);
-float randY = random(-0.5, 0.5);
-float randSize = random(0, 0.5);
+float randX;
+float randY;
+float randSize;
 
+boolean newbg;
 
 void setup() {
-
+  smooth(8);
   size(900, 900);
-
-  // List all the available serial ports
-  printArray(Serial.list());
-  // Open the port you are using at the rate you want:
+  frameRate(30);
+  
+  newbg = false;
+  
   myPort = new Serial(this, Serial.list()[0], 9600);
-  myPort.clear();
-  // Throw out the first reading, in case we started reading
-  // in the middle of a string from the sender.
-  myString = myPort.readStringUntil(lf);
-  myString = null;
 
   String[] cameras = Capture.list();
 
@@ -83,12 +78,48 @@ void setup() {
 
     bg = cam.copy();
   }
-  frameRate(30);
+
+  init();
+}
+
+void init() {
+  noStroke();
+
+  step = 0;
+  lf = 10;
+
+  myString = null;
+
+  currentUser = new byte[4];
+  confirmedNewUser = true;
+  answers = new byte[4];
+
+  selectedAnswer = 0;
+  currDistance = 0;
+
+  qID = 0;
+
+  polygonApproximation = true;
+  mask = false;
+
+  randX = random(-0.5, 0.5);
+  randY = random(-0.5, 0.5);
+  randSize = random(0, 0.5);
+
+
+
+  // List all the available serial ports
+  printArray(Serial.list());
+  // Open the port you are using at the rate you want:
+  myPort.clear();
+  // Throw out the first reading, in case we started reading
+  // in the middle of a string from the sender.
+  myString = myPort.readStringUntil(lf);
+  myString = null;
 
   bg_img = loadImage("bg.jpg");
   bg_img.resize(900, 900);
   background(bg_img);
-  smooth(8);
   //fill();
 
   textSize(30);
@@ -97,6 +128,13 @@ void setup() {
 }
 
 void draw() {
+
+  if (cam.available() == true && newbg == false) {
+    cam.read();
+    bg = cam.copy();
+    println("AMGEIGEIUH");
+    newbg = true;
+  }
 
   randX = random(-0.5, 0.5);
   randY = random(-0.5, 0.5);
@@ -121,8 +159,6 @@ void draw() {
 
     image(src, 0, 0);
 
-    src = cam.copy();
-
     opencv.loadImage(src);
 
     opencv.diff(bg);
@@ -137,7 +173,6 @@ void draw() {
 
     result = opencv.getOutput();
 
-
     image(result, 0, 0);
   }
 
@@ -145,8 +180,7 @@ void draw() {
   if (qID < 5) {
     showQuestions(qID);
   } else if (qID < 6) {
-    qID = 0;
-    confirmedNewUser = true;
+    init();
   }
 
   //Leitura do input
@@ -156,7 +190,9 @@ void draw() {
 
       if (myString.charAt(0) == 'D') {
         String[] stringSplit = split(myString, ':');
-        currDistance = int(float(stringSplit[1]));
+        if (stringSplit.length > 1) {
+          currDistance = int(float(stringSplit[1]));
+        }
       }
 
       //Se recebeu input de um botao
@@ -177,6 +213,7 @@ void draw() {
           }
 
           if (qID == 5) {
+
             background(0);
             PImage img = cam.copy();
             image(img, 0, 0);
