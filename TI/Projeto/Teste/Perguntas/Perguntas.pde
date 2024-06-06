@@ -44,7 +44,7 @@ void setup() {
   // List all the available serial ports
   printArray(Serial.list());
   // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[0], 9600);
+  myPort = new Serial(this, Serial.list()[2], 9600);
   myPort.clear();
   // Throw out the first reading, in case we started reading
   // in the middle of a string from the sender.
@@ -61,7 +61,7 @@ void setup() {
     printArray(cameras);
 
     //if it fails replace cameras[0] per "pipeline:autovideosrc"
-    cam = new Capture(this, 1280, 720, cameras[0], 30);
+    cam = new Capture(this, 1280, 720, cameras[2], 30);
     cam.start();
 
     opencv = new OpenCV(this, cam);
@@ -210,7 +210,7 @@ void draw() {
               index++;
             }
             
-            saveJSONArray(contoursJSON, "data/"+str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
+            saveJSONArray(contoursJSON, "../data/"+str(currentUser[0])+" "+str(currentUser[1])+" "+str(currentUser[2])+" "+str(currentUser[3])+".json");
             
             return;
           }
